@@ -12,6 +12,7 @@ train = pd.read_csv(os.path.join('Data', 'train.csv'))
 test = pd.read_csv(os.path.join('Data', 'test.csv'))
 
 is_promoted = train['is_promoted']
+employee_id = test['employee_id']
 train = train.drop(['is_promoted', ], 1)
 concat = pd.concat([train, test], ignore_index=True)
 
@@ -29,21 +30,28 @@ models = [GradientBoostingClassifier(), RandomForestClassifier(), DecisionTreeCl
 
 
 params = [
-    {'loss':['deviance', 'exponential'], 'n_estimators':[10, 50, 100],'criterion':['friedman_mse', 'mse', 'mse'], 'max_depth':[3, 10, 30, 50], 'min_impurity_decrease': [0.0, 0.01, 0.05, 0.1], 'max_features': ['auto', 'sqrt', 'log2', None]},
-    {'n_estimators': [10, 50, 100], 'criterion':['entropy','gini'], 'max_depth': [None, 10, 20, 30], 'max_features': ['auto', 'sqrt', 'log2', None], 'min_impurity_decrease': [0.0, 0.01, 0.05, 0.1], 'bootstrap':[True, False], 'n_jobs':[-1]},
-    {'criterion':['entropy','gini'], 'max_depth': [None, 10, 20, 30], 'max_features': ['auto', 'sqrt', 'log2', None], 'min_impurity_decrease': [0.0, 0.01, 0.05, 0.1]},
-    {'criterion':['entropy','gini'], 'max_depth': [None, 10, 20, 30], 'max_features': ['auto', 'sqrt', 'log2', None], 'min_impurity_decrease': [0.0, 0.01, 0.05, 0.1]},
+    {'n_estimators':[10, 50, 100],'max_depth':[3, 10, 30]},
+    {'n_estimators': [10, 50, 100], 'criterion':['entropy','gini'], 'max_depth': [None, 10, 20], 'n_jobs':[-1]},
+    {'criterion':['entropy','gini'], 'max_depth': [None, 10, 20, 30]},
+    {'criterion':['entropy','gini'], 'max_depth': [None, 10, 20, 30]},
     {'n_neighbors': [1, 3, 5, 7, 9], 'weights': ['uniform', 'distance'], 'n_jobs':[-1]},
     {'alpha': [0.2, 0.5, 1.0], 'fit_prior':[True, False]},
 ]
 
 print(concat)
-for model, param in zip(models, params):
+# for model, param in zip(models, params):
+#
+#
+#     gcv = GridSearchCV(estimator=model, param_grid=param, n_jobs=-1, cv=5, scoring='f1')
+#     gcv.fit( concat.iloc[:train.shape[0], :] , is_promoted)
+#
+#     gcv.best_estimator_
+    # print(gcv.best_params_)
+    # print(gcv.best_score_)
 
+clf = RandomForestClassifier(bootstrap=True, criterion='entropy', max_depth=20, max_features=None, n_estimators=50, n_jobs=-1)
+clf.fit(concat.iloc[:train.shape[0], :] , is_promoted)
+prediction = clf.predict(concat.iloc[train.shape[0]:, :])
 
-    gcv = GridSearchCV(estimator=model, param_grid=param, n_jobs=-1, cv=5, scoring='f1')
-    gcv.fit( concat.iloc[:train.shape[0], :] , is_promoted)
-
-    # gcv.best_estimator_
-    print(gcv.best_params_)
-    print(gcv.best_score_)
+df = pd.DataFrame({"employee_id": employee_id, "is_promoted": prediction})
+df.to_csv("output.csv", index=False)
