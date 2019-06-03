@@ -11,10 +11,12 @@ from sklearn.model_selection import GridSearchCV
 from scipy import stats
 from keras.models import Sequential
 from keras.layers import Dense
+from xgboost import XGBClassifier
 
 train = pd.read_csv(os.path.join('Data', 'train.csv'))
 test = pd.read_csv(os.path.join('Data', 'test.csv'))
 
+xgboost = True
 voting = True
 metric = 'f1'
 cv = 5
@@ -63,8 +65,12 @@ concat = concat.drop(['education', 'department', 'recruitment_channel', 'gender'
 #         f.write("Best set of parameters : " + str(gcv.best_params_) + "\n")
 #         f.write("Best " + metric + " : "+ str(gcv.best_score_) + "\n")
 #         prediction = gcv.best_estimator_.predict(concat.iloc[train.shape[0]:, :])
+#         prediction_proba = gcv.best_estimator_.predict_proba(concat.iloc[train.shape[0]:, :])
 #         df = pd.DataFrame({"employee_id": employee_id, "is_promoted": prediction})
+#         df_proba = pd.DataFrame({"employee_id": employee_id, "is_promoted": prediction_proba})
 #         df.to_csv("Best_" + model_name + "_output.csv", index=False)
+#         df_proba.to_csv("Best_" + model_name + "_probability_output.csv", index=False)
+#
 #
 # if voting:
 #     vclf = VotingClassifier(estimators=list(zip(models_names, best_models)), voting='hard')
@@ -72,6 +78,15 @@ concat = concat.drop(['education', 'department', 'recruitment_channel', 'gender'
 #     prediction = vclf.predict(concat.iloc[train.shape[0]:, :])
 #     df = pd.DataFrame({"employee_id": employee_id, "is_promoted": prediction})
 #     df.to_csv("Output/voting_output.csv", index=False)
+
+if xgboost:
+
+    xgb = XGBClassifier()
+    xgb.fit(concat.iloc[:train.shape[0], :], is_promoted)
+    prediction = xgb.predict(concat.iloc[train.shape[0]:, :])
+    df = pd.DataFrame({"employee_id": employee_id, "is_promoted": prediction})
+    df.to_csv("Output/XGB_output.csv", index=False)
+
 
 def make_model(hidden, n_cols, output):
 
@@ -93,22 +108,35 @@ def vary_threshold(prediction_file, index_col_name, value_col_name, init, upto):
         df.to_csv("Output/DNN_" + str(int(np.sqrt(concat.shape[1]))) + "_" + str(time.time()) + "_threshold_" + str(thresh) + "_.csv", index=False)
 
 
-def calc_vote_from_files(files, index_col_name, value_col_name):
+def calc_vote_from_files(files, index_col_name, value_col_name, type, threshold=0.5):
 
     index_col = pd.read_csv("Output/" + files[0])[index_col_name]
     values = []
+    df = pd.DataFrame()
+    i = 0
     for file in files:
-        values.append(pd.read_csv("Output/" + file)[value_col_name])
 
-    final_values = stats.mode(np.array(values))[0][0]
-    df = pd.DataFrame({index_col_name : index_col, value_col_name: final_values})
-    df.to_csv("Output/Voting_" + "_".join(files) + ".csv", index=False)
+        df[i] = pd.read_csv("Output/" + file)[value_col_name]
+        i = i + 1
+
+    if type == 'soft':
+        df.set_index(index_col)
+        df['mean'] = df.mean(1)
+        df[value_col_name] = df['mean'].apply(lambda x: 1 if x > threshold else 0, 1)
+
+    else:
+        df.set_index(index_col)
+        df[value_col_name] = df['mode'].apply(lambda x: stats.mode(x)[0][0], 1)
+
+    # final_values = stats.mode(np.array(values))[0][0]
+    final = df[[value_col_name]].reset_index()
+    final.to_csv("Output/Voting_" + "_".join(files) + ".csv", index=False)
 
 
 files = ['Best_GradientBoostingClassifier_output.csv', 'Best_RandomForestClassifier_output.csv', 'DNN_7_1559382607.6679935_threshold_0.45_.csv']
 index_col_name = 'employee_id'
 value_col_name = 'is_promoted'
-# calc_vote_from_files(files, index_col_name, value_col_name)
+# calc_vote_from_files(files, index_col_name, value_col_name, 'hard')
 
 
 
