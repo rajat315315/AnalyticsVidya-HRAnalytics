@@ -1,1 +1,15 @@
-For model : GradientBoostingClassifierBest set of parameters : {'max_depth': 10, 'n_estimators': 50}Best f1 : 0.5015702748342471For model : RandomForestClassifierBest set of parameters : {'criterion': 'entropy', 'max_depth': None, 'n_estimators': 100, 'n_jobs': -1}Best f1 : 0.4558969600394234For model : DecisionTreeClassifierBest set of parameters : {'criterion': 'entropy', 'max_depth': 20}Best f1 : 0.4728411469941834For model : ExtraTreeClassifierBest set of parameters : {'criterion': 'gini', 'max_depth': None}Best f1 : 0.35578369026539325For model : KNeighborsClassifierBest set of parameters : {'n_jobs': -1, 'n_neighbors': 1, 'weights': 'uniform'}Best f1 : 0.27403348633651203For model : BernoulliNBBest set of parameters : {'alpha': 0.2, 'fit_prior': False}Best f1 : 0.2898899354293305
+For model : RandomForestClassifier
+Best set of parameters : {'max_depth': None, 'n_estimators': 100, 'criterion': 'entropy', 'n_jobs': -1}
+Best f1 : 0.45815616800682124
+For model : DecisionTreeClassifier
+Best set of parameters : {'max_depth': 20, 'criterion': 'entropy'}
+Best f1 : 0.4683638201354556
+For model : ExtraTreeClassifier
+Best set of parameters : {'max_depth': 30, 'criterion': 'entropy'}
+Best f1 : 0.3803603433543977
+For model : KNeighborsClassifier
+Best set of parameters : {'weights': 'uniform', 'n_jobs': -1, 'n_neighbors': 1}
+Best f1 : 0.2837026557721215
+For model : BernoulliNB
+Best set of parameters : {'alpha': 0.2, 'fit_prior': False}
+Best f1 : 0.2911013530387557
