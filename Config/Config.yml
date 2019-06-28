@@ -14,6 +14,20 @@ COLUMNS:
           -
             -
 
+IMPUTATION:
+  PLAIN:
+    "A": "MEAN"
+    "B": "MODE"
+    "C": 2
+
+  GROUPED:
+    "A": ["B", "C"] : "MODE"
+
+
+REPLACE:
+  "A" : {"X": 2, "Q": 3}
+
+
 CLASSIFIERS:
   -RANDOMFORESTCLASSIFIER
   -GRADIENTBOOSTINGCLASSIFIER

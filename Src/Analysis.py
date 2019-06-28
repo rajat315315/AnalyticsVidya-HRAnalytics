@@ -1,15 +1,16 @@
 import pandas as pd
 import numpy as np
-
-class MyData():
-
-    def __init__(self, Train_df, Test_df, Target):
-        self.Train_df = Train_df
-        self.Test_df = Test_df
-        self.Target = Target
-
-    def AnalyzeNA(self):
+from Data_PreProcess import Pre_Process
 
 
-    def Analyse(self):
+
+
+Pre_Process(df, config)
+
+Generate_NewColumns(df, config)
+
+
+
+
+
 
